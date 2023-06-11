@@ -9,11 +9,11 @@ describe('Faucet', function () {
     const Faucet = await ethers.getContractFactory('Faucet');
     const faucet = await Faucet.deploy();
 
-    const [owner] = await ethers.getSigners();
+    const [owner, address2] = await ethers.getSigners();
 
     let withdrawAmount = ethers.utils.parseUnits("1", "ether");
 
-    return { faucet, owner, withdrawAmount };
+    return { faucet, owner, withdrawAmount, address2 };
   }
 
   it('should deploy and set the owner correctly', async function () {
@@ -27,4 +27,18 @@ describe('Faucet', function () {
 
     await expect(faucet.withdraw(withdrawAmount)).to.be.reverted;
   });
+
+  it('only owner can withdraw all', async function () {
+    const { faucet, address2 } = await loadFixture(deployContractAndSetVariables);
+
+    await expect(faucet.connect(address2).withdrawAll()).to.be.reverted;
+  });
+
+  it('only owner can destroy faucet', async function () {
+    const { faucet, address2 } = await loadFixture(deployContractAndSetVariables);
+
+    await expect(faucet.connect(address2).destroyFaucet()).to.be.reverted;
+  });
+
+
 });
